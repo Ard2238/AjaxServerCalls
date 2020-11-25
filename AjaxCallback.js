@@ -36,13 +36,17 @@ makeAJAXCall("POST", postUrl, userAdded, true, empData)
 function makeAJAXCall(methodType, url, callback, async = true, data = null){
     let xhr = new XMLHttpRequest;
 
-    xhr.onreadystatechange = function() { 
+    xhr.onreadystatechange = function(resolve,reject) { 
         console.log(methodType + " State changed Called. Ready State:  " +  xhr.readyState + " Status: " + xhr.status)
         if(xhr.readyState === 4){
-            if(xhr.status === 200 ||  xhr.status === 201){
-                callback(xhr.responseText)
-            }else if (xhr.status >= 400){
-                console.log("Handle 400 Client Error or 500 Server Error " + showTime())
+            if(xhr.status.toString().match('^[2][0-9]{2}$')){
+                resolve(xhr.responseText)
+            }else if (xhr.status.toString().match('^[4,5][0-9]{2}$')){
+                reject({
+                    status: xhr.status,
+                    statusText: xhr.statusText
+                })
+                console.log("XHR Failed")
             }
         }
     }
